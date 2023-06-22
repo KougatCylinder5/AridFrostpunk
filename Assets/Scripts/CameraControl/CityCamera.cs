@@ -94,11 +94,11 @@ public class CityCamera : MonoBehaviour
     void ScrollView()
     {
         targetHeight += -ScrollDiff()/120f;
-        targetHeight = Mathf.Clamp(targetHeight, 1, 15);
+        targetHeight = Mathf.Clamp(targetHeight, 1, 25);
         float time = 1f;
         height = Mathf.SmoothDamp(height, targetHeight, ref time, Time.deltaTime, 30f);
         targetDistFromPivot += -ScrollDiff()/60f;
-        targetDistFromPivot = Mathf.Clamp(targetDistFromPivot, 5, 10);
+        targetDistFromPivot = Mathf.Clamp(targetDistFromPivot, 5, 15);
         time = 1f;
         distFromPivot = Mathf.SmoothDamp(distFromPivot, targetDistFromPivot, ref time, Time.deltaTime,20f);
         UpdateCamera();
@@ -113,7 +113,7 @@ public class CityCamera : MonoBehaviour
         gameObject.transform.LookAt(pivotPoint);
 
 
-        if (pivotPoint.position.magnitude > 15f)
+        if (pivotPoint.position.magnitude > 45f)
         {
             Debug.Log(Mathf.Atan(pivotPoint.position.y/pivotPoint.position.x));
         }
