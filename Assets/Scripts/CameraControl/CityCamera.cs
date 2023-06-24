@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using static UnityEditor.PlayerSettings;
 
 public class CityCamera : MonoBehaviour
 {
@@ -24,6 +24,7 @@ public class CityCamera : MonoBehaviour
     private Transform pivotPoint;
     [SerializeField]
     private float mouseSensitivity = 1;
+    public int maxDistance = 50;
     public float Rotation { get => rotation; set => rotation = value % 360; }
 
     // Start is called before the first frame update
@@ -89,16 +90,22 @@ public class CityCamera : MonoBehaviour
             direction.y = 0;
             pivotPoint.transform.Translate(direction.normalized * -MousePosDiff().y/10);
         }
+        if (pivotPoint.position.magnitude > maxDistance)
+        {
+            Ray ray = new Ray(pivotPoint.position, new(-pivotPoint.position.x, 0, -pivotPoint.position.z));
+            pivotPoint.position = ray.GetPoint(pivotPoint.position.magnitude - maxDistance);
+
+        }
     }
 
     void ScrollView()
     {
-        targetHeight += -ScrollDiff()/120f;
-        targetHeight = Mathf.Clamp(targetHeight, 1, 25);
+        targetHeight += -ScrollDiff()/30f;
+        targetHeight = Mathf.Clamp(targetHeight, 4, 70);
         float time = 1f;
-        height = Mathf.SmoothDamp(height, targetHeight, ref time, Time.deltaTime, 30f);
+        height = Mathf.SmoothDamp(height, targetHeight, ref time, Time.deltaTime, 50f);
         targetDistFromPivot += -ScrollDiff()/60f;
-        targetDistFromPivot = Mathf.Clamp(targetDistFromPivot, 5, 15);
+        targetDistFromPivot = Mathf.Clamp(targetDistFromPivot, 10, 30);
         time = 1f;
         distFromPivot = Mathf.SmoothDamp(distFromPivot, targetDistFromPivot, ref time, Time.deltaTime,20f);
         UpdateCamera();
@@ -110,15 +117,17 @@ public class CityCamera : MonoBehaviour
                 Mathf.Cos(Mathf.Deg2Rad * Rotation) * distFromPivot,
                 height,
                 Mathf.Sin(Mathf.Deg2Rad * Rotation) * distFromPivot);
+
+        Ray ray = new Ray(gameObject.transform.position, -gameObject.transform.forward);
+
+        if (Physics.Raycast(ray,out RaycastHit hit, 5))
+        {
+            gameObject.transform.position = ray.GetPoint(hit.distance - 4.99f);
+        }
+
         gameObject.transform.LookAt(pivotPoint);
 
-
-        if (pivotPoint.position.magnitude > 45f)
-        {
-            Debug.Log(Mathf.Atan(pivotPoint.position.y/pivotPoint.position.x));
-        }
         
-
     }
 
     float ScrollDiff()
